@@ -25,18 +25,26 @@ final class UserController {
     // MARK: - Actions
     
     func index(request: Request) throws -> ResponseRepresentable {
-        return try User.all().makeNode().converted(to: JSON.self)
+        return JSON(try User.all().map { try $0.makeJSON() })
     }
 
     func store(request: Request) throws -> ResponseRepresentable {
-        guard let json = request.json else {
+        guard
+            let requestJson = request.json,
+            let passwordStr = requestJson["password"]?.string
+        else {
             throw Abort.badRequest
         }
+
+        let password = try Password(password: passwordStr)
+        var json = requestJson
+        json["password"] = JSON(Node(password.hashString))
+        json["salt"] = JSON(Node(password.saltString))
 
         var user = try User(node: json)
         try user.save()
 
-        return user
+        return try user.makeJSON()
     }
 
     func show(request: Request, item user: User) throws -> ResponseRepresentable {
@@ -66,7 +74,10 @@ final class UserController {
         return modifiedUser
     }
 
-    private func extractField<T: ValidationSuite>(name fieldName: String, from request: Request, to value: inout Valid<T>) throws where T.InputType: PolymorphicInitializable {
+    private func extractField<T: ValidationSuite>
+        (name fieldName: String, from request: Request, to value: inout Valid<T>) throws
+        where T.InputType: PolymorphicInitializable
+    {
         guard let newValue = request.data[fieldName] else { return }
 
         if let validValue = try? newValue.validated(by: T.self) {

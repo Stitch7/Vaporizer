@@ -14,6 +14,7 @@ extension User {
             users.id()
             users.string("username")
             users.string("password")
+            users.string("salt")
             users.string("firstname")
             users.string("lastname")
         }
