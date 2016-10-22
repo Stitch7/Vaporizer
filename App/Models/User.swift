@@ -7,6 +7,8 @@
 //
 
 import Vapor
+import Auth
+import HTTP
 
 final class User: Model {
 
@@ -14,7 +16,6 @@ final class User: Model {
 
     var id: Node?
     var exists = false
-
     var username: Valid<Username>
     var password: Valid<Password>
     var firstname: Valid<Firstname>
@@ -44,7 +45,6 @@ final class User: Model {
         }
 
         self.id = try node.extract("id")
-
         self.username = try username.validated()
         self.password = try password.validated()
         self.firstname = try firstname.validated()
@@ -61,5 +61,41 @@ final class User: Model {
             "firstname": firstname.value,
             "lastname": lastname.value
         ])
+    }
+}
+
+
+extension User: Auth.User {
+    static func authenticate(credentials: Credentials) throws -> Auth.User {
+        let error = Abort.custom(status: .badRequest, message: "Invalid credentials")
+
+        guard let apiKey = credentials as? APIKey else {
+            throw error
+        }
+
+        let foundUser = try User.query()
+            .filter("username", apiKey.id)
+            .filter("password", apiKey.secret)
+            .first()
+
+        guard let user = foundUser else {
+            throw error
+        }
+
+        return user
+    }
+
+    static func register(credentials: Credentials) throws -> Auth.User {
+        throw Abort.custom(status: .badRequest, message: "Register not supported")
+    }
+}
+
+extension Request {
+    func user() throws -> User {
+        guard let user = try auth.user() as? User else {
+            throw Abort.custom(status: .badRequest, message: "Invalid user type")
+        }
+
+        return user
     }
 }

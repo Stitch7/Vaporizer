@@ -7,14 +7,21 @@
 //
 
 import Vapor
+import Auth
+import Routing
+import HTTP
 
 extension Application {
-    public func routes(_ drop: Droplet) {
+    public func publicRoutes(_ drop: Droplet) {
         let indexController = IndexController(droplet: drop)
         let userController = UserController(droplet: drop)
 
         drop.get("/", handler: indexController.index)
         drop.get("health", handler: indexController.health)
-        drop.resource("users", userController)
+        drop.post("/register", handler: userController.store)
+    }
+
+    public func protectedRoutes(_ drop: Droplet, protectedGroup: RouteGroup<Responder, Droplet>) {
+        protectedGroup.resource("users", UserController(droplet: drop))
     }
 }

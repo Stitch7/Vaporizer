@@ -9,9 +9,9 @@
 import Vapor
 import HTTP
 
-final class UserController: ResourceRepresentable {
+final class UserController {
 
-    typealias Item = User
+    // MARK: - Properties
 
     let drop: Droplet
 
@@ -29,36 +29,30 @@ final class UserController: ResourceRepresentable {
     }
 
     func store(request: Request) throws -> ResponseRepresentable {
-        guard
-            let requestBody = request.body.bytes,
-            let json = try? JSON(bytes: requestBody)
-        else {
+        guard let json = request.json else {
             throw Abort.badRequest
         }
 
-        var user = try User(node: json.makeNode())
+        var user = try User(node: json)
         try user.save()
 
-        return try user.makeJSON()
+        return user
     }
 
     func show(request: Request, item user: User) throws -> ResponseRepresentable {
-        return try user.makeJSON()
+        return user
     }
 
     func replace(request: Request, item user: User) throws -> ResponseRepresentable {
-        guard
-            let requestBody = request.body.bytes,
-            let json = try? JSON(bytes: requestBody)
-        else {
+        guard let json = request.json else {
             throw Abort.badRequest
         }
 
-        var replacedUser = try User(node: json.makeNode())
+        var replacedUser = try User(node: json)
         replacedUser.id = user.id
         try replacedUser.save()
 
-        return try replacedUser.makeJSON()
+        return replacedUser
     }
 
     func modify(request: Request, item user: User) throws -> ResponseRepresentable {
@@ -69,7 +63,7 @@ final class UserController: ResourceRepresentable {
         try extractField(name: "lastname", from: request, to: &modifiedUser.lastname)
         try modifiedUser.save()
 
-        return try modifiedUser.makeJSON()
+        return modifiedUser
     }
 
     private func extractField<T: ValidationSuite>(name fieldName: String, from request: Request, to value: inout Valid<T>) throws where T.InputType: PolymorphicInitializable {
@@ -86,15 +80,16 @@ final class UserController: ResourceRepresentable {
     func destroy(request: Request, item user: User) throws -> ResponseRepresentable {
         try user.delete()
 
-        return user
+        return JSON([:])
     }
+}
 
-    // MARK: - ResourceRepresentable
+// MARK: - ResourceRepresentable
 
+extension UserController: ResourceRepresentable {
     func makeResource() -> Resource<User> {
         return Resource(
             index: index,
-            store: store,
             show: show,
             replace: replace,
             modify: modify,

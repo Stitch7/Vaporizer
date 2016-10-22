@@ -7,11 +7,12 @@
 //
 
 import HTTP
+import Auth
 
 extension Application {
     public var middleware: [Middleware] {
         return [
-            SampleMiddleware(),
+            AuthMiddleware(user: User.self),
         ]
     }
 }
