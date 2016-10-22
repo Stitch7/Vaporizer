@@ -6,14 +6,16 @@
 //  Copyright © 2016 Christopher Reitz. All rights reserved.
 //
 
+import Foundation
 import Vapor
-import Auth
+import SwiftyBeaver
+import SwiftyBeaverVapor
 
 public final class Application {
 
     // MARK: - Properties
 
-    public var drop: Droplet?
+    public var drop: Droplet
 
     // MARK: - Initializers
 
@@ -23,22 +25,35 @@ public final class Application {
             // Simulate passing `--env=testing` from the command line if testing is true
             args.append("--env=testing")
         }
-        let drop = Droplet(arguments: args)
+        drop = Droplet(arguments: args)
 
-        configurePreparations(drop)
-        configureProviders(drop)
-        configureMiddlewares(drop)
-        configureRoutes(drop)
-
-        self.drop = drop
+        configureProviders()
+        configureLogging()
+        configurePreparations()
+        configureMiddlewares()
+        configureRoutes()
     }
 
-    private func configurePreparations(_ drop: Droplet) {
+    private func configurePreparations() {
         // Add preparations from the Preparations folder
         drop.preparations = preparations
     }
 
-    private func configureProviders(_ drop: Droplet) {
+    private func configureLogging() {
+        var destinations =  [BaseDestination]()
+        destinations.append(ConsoleDestination())
+
+        if let logfile = drop.config["app", "logfile"]?.string {
+            let file = FileDestination()
+            file.logFileURL = URL(string: "file://" + logfile)!
+            destinations.append(file)
+        }
+
+        let provider = SwiftyBeaverProvider(destinations: destinations)
+        drop.addProvider(provider)
+    }
+
+    private func configureProviders() {
         // Add providers from the Providers folder
         do {
             for provider in providers {
@@ -49,12 +64,12 @@ public final class Application {
         }
     }
 
-    private func configureMiddlewares(_ drop: Droplet) {
+    private func configureMiddlewares() {
         // Add middlewares from the Middleware folder
         drop.middleware += middleware
     }
 
-    private func configureRoutes(_ drop: Droplet) {
+    private func configureRoutes() {
         // Add routes from the Routes folder
         publicRoutes(drop)
 
@@ -67,6 +82,6 @@ public final class Application {
     // MARK: - Public
 
     public func start() {
-        drop?.run()
+        drop.run()
     }
 }

@@ -55,6 +55,8 @@ final class User: Model {
             "lastname": lastname.value
         ])
     }
+    
+    // MARK: - JSONRepresentable
 
     func makeJSON() throws -> JSON {
         return JSON([
