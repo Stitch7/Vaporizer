@@ -82,6 +82,7 @@ public final class Application {
     // MARK: - Public
 
     public func start() {
+        drop.log.info("Starting server")
         drop.run()
     }
 }

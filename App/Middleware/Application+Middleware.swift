@@ -12,6 +12,7 @@ import Auth
 extension Application {
     public var middleware: [Middleware] {
         return [
+            ServerNameMiddleware(),
             AuthMiddleware(user: User.self),
         ]
     }
