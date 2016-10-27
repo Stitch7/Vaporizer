@@ -17,7 +17,7 @@ extension Application {
         let userController = UserController(droplet: drop)
 
         drop.get("/", handler: indexController.index)
-        drop.get("health", handler: indexController.health)
+        drop.get("/health", handler: indexController.health)
         drop.post("/register", handler: userController.store)
     }
 

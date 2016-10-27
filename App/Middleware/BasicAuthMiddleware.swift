@@ -12,7 +12,9 @@ import HTTP
 class BasicAuthMiddleware: Middleware {
 	func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
         guard let apiKey = request.auth.header?.basic else {
-            throw Abort.custom(status: .unauthorized, message: "Basic authorization required")
+            let response = Response(status: .unauthorized)
+            response.headers["WWW-Authenticate"] = "Basic"
+            return response
         }
 
         try request.auth.login(apiKey, persist: false)
