@@ -1,0 +1,9 @@
+.DS_Store
+.dockerignore
+.git
+.gitignore
+.build/
+Dockerfile
+Packages/
+README.md
+*.xcodeproj/
