@@ -9,8 +9,8 @@
 import Vapor
 import HTTP
 
-class BasicAuthMiddleware: Middleware {
-	func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
+final class BasicAuthMiddleware: Middleware {
+    func respond(to request: Request, chainingTo chain: Responder) throws -> Response {
         guard let apiKey = request.auth.header?.basic else {
             let response = Response(status: .unauthorized)
             response.headers["WWW-Authenticate"] = "Basic"

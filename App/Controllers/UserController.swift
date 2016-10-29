@@ -56,11 +56,11 @@ final class UserController {
             throw Abort.badRequest
         }
 
-        var replacedUser = try User(node: json)
-        replacedUser.id = user.id
-        try replacedUser.save()
+        var replaced = try User(node: json)
+        replaced.id = user.id
+        try replaced.save()
 
-        return replacedUser
+        return replaced
     }
 
     func modify(request: Request, item user: User) throws -> ResponseRepresentable {

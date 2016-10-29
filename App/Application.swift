@@ -11,7 +11,7 @@ import Vapor
 import SwiftyBeaver
 import SwiftyBeaverVapor
 
-public final class Application {
+final class Application {
 
     // MARK: - Properties
 

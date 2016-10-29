@@ -42,9 +42,11 @@ final class User: Model {
         self.firstname = try firstname.validated()
         self.lastname = try lastname.validated()
     }
+}
 
-    // MARK: - NodeRepresentable
+// MARK: - NodeRepresentable
 
+extension User {
     func makeNode(context: Context) throws -> Node {
         return try Node(node: [
             "id": id,
@@ -55,9 +57,11 @@ final class User: Model {
             "lastname": lastname.value
         ])
     }
-    
-    // MARK: - JSONRepresentable
+}
 
+// MARK: - JSONRepresentable
+
+extension User {
     func makeJSON() throws -> JSON {
         return JSON([
             "id": id!,
@@ -68,21 +72,23 @@ final class User: Model {
     }
 }
 
+// MARK: - Auth
+
 extension User: Auth.User {
     static func authenticate(credentials: Credentials) throws -> Auth.User {
-        let invalidCredentialsError = Abort.custom(status: .badRequest, message: "Invalid credentials")
+        let invalidCredentials = Abort.custom(status: .badRequest, message: "Invalid credentials")
 
         guard let apiKey = credentials as? APIKey else {
-            throw invalidCredentialsError
+            throw invalidCredentials
         }
 
         guard let user = try User.query().filter("username", apiKey.id).first() else {
-            throw invalidCredentialsError
+            throw invalidCredentials
         }
 
         let password = try Password(hash: user.password.value, salt: user.salt)
         guard password.verifyPassword(withPassword: apiKey.secret) else {
-            throw invalidCredentialsError
+            throw invalidCredentials
         }
 
         return user

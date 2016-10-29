@@ -11,7 +11,7 @@ import Cryptor
 import Vapor
 import Fluent
 
-public class Password {
+final class Password {
 
     // MARK: - Properties
 
