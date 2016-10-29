@@ -8,6 +8,7 @@
 
 import Vapor
 import Auth
+import Fluent
 import HTTP
 
 final class User: Model {
@@ -67,8 +68,17 @@ extension User {
             "id": id!,
             "username": Node(username.value),
             "firstname": Node(firstname.value),
-            "lastname": Node(lastname.value)
+            "lastname": Node(lastname.value),
+            "forms": try forms().all().makeNode()
         ])
+    }
+}
+
+// MARK: - Relations
+
+extension User {
+    func forms() throws -> Children<Form> {
+        return children()
     }
 }
 

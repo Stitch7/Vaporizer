@@ -23,5 +23,6 @@ extension Application {
 
     public func protectedRoutes(_ drop: Droplet, protectedGroup: RouteGroup<Responder, Droplet>) {
         protectedGroup.resource("users", UserController(droplet: drop))
+        protectedGroup.resource("forms", FormController(droplet: drop))
     }
 }
