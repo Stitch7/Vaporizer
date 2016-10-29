@@ -29,7 +29,15 @@ final class FormController {
     }
 
     func store(request: Request) throws -> ResponseRepresentable {
-        guard let json = request.json else { throw Abort.badRequest }
+        guard
+            let requestJson = request.json,
+            let userId = try request.user().id?.int
+        else {
+            throw Abort.badRequest
+        }
+
+        var json = requestJson
+        json["user_id"] = JSON(Node(userId))
 
         var form = try Form(node: json)
         try form.save()
