@@ -13,6 +13,7 @@ extension Application {
     public var middleware: [Middleware] {
         return [
             ServerNameMiddleware(),
+            CorsMiddleware(),
             AuthMiddleware(user: User.self),
         ]
     }
